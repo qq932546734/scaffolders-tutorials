@@ -69,3 +69,12 @@ for ele in another_ds:
     example2 = tf.io.parse_single_example(b, desc)
     # 这样不转换成bytes也是可以的
     example3 = tf.io.parse_single_example(ele, desc)
+
+
+# 一些example，每个example有两个特征，first和second
+features = {}
+features['first'] = [1,2,3,4]
+features['second'] = [5,6,7,8]
+
+dict_ds = tf.data.Dataset.from_tensor_slices(features)
+# 此时得到的dataset每一个element就是一个dict

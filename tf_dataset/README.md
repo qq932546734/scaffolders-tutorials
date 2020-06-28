@@ -36,7 +36,9 @@ exp = tf.train.Example.FromString(in_bytes)
 # 读取example的某一个feature
 input_ids = exp.features.feature['input_ids'].int64_list.value[:]
 
-# Example的序列化，其实就是dict的序列化，因此，多个序列化之后的bytes相加，仍然可以反序列化回去，对两个Example的结构没有要求（因为都是dict，就相当于dict相加一样，key完全一样都没问题）
+# Example的序列化，其实就是dict的序列化，因此，多个序列化之后的bytes相加，仍然可以
+# 反序列化回去，对两个Example的结构没有要求（因为都是dict，就相当于dict相加一样，
+# key完全一样都没问题）
 new = tf.train.Example.FromString(first_bytes + second_bytes)
 
 # 如何知道一个example对象的keys, 记得要加上list，不然得到的KeyView
@@ -67,6 +69,10 @@ ds = tf.data.TFRecordDataset(filenames=["first.tfrec", 'second.tfrec'])
 > 既然TFRecord文件只能串行读取，那怎么能保证效率呢？如我需要对一个Dataset进行shuffle，然后读取
 
 > TFRecord文件能不跟`tf.train.Example`连用吗？如果可以的话，怎么直接写入和读取呢？
+
+> `tf.io.parse_example()`和`tf.io.parse_single_example()`的区别？
+>
+> 二者的返回值都是dict，key是特征的名称，value是`tf.Tensor`。他们最常用的场景都是在TFRecordDataset中，解析读出来的二进制。Dataset可以进行batch，如果先对TFRecordDataset进行batch的话，那么得到的`tf.Tensor`其shape为`(batch_size,)`类型为`tf.string`，此时我们是不能用`parse_single_example`来parse的，只能用`parse_example`。其他大部分情况没有区别。
 
 ### `tf.data.Dataset`
 
@@ -164,7 +170,7 @@ with tf.io.TFRecordWriter('test.tfrec') as writer:
 
 * `from_tensor()` & `from_tensor_slice()`
 
-从内存中构造dataset。前者是将输入当做一个example，后者是将输入中的每一个element当做一个example。
+从内存中构造dataset。前者是将输入当做一个example，后者是将输入中的每一个element当做一个example。如果参数是dict，那么获得的Dataset的element也是dict。
 
 * `from_generator()`
 
